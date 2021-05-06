@@ -17,6 +17,7 @@ To close the app, run: pm2 stop vaccineNotifier.js && pm2 delete vaccineNotifier
 const PINCODE = process.env.PINCODE
 const EMAIL = process.env.TO_EMAIL
 const AGE = process.env.AGE
+const NUM_OF_DAYS = process.env.NUM_OF_DAYS
 
 async function main(){
     try {
@@ -52,7 +53,7 @@ function getSlotsForDate(DATE) {
         .then(function (slots) {
             let sessions = slots.data.sessions;
             let validSlots = sessions.filter(slot => slot.min_age_limit <= AGE &&  slot.available_capacity > 0)
-            console.log({date:DATE, validSlots: validSlots.length})
+            console.log({checked:moment().format('DD-MM-YYYY HH:mm:ss'), date:DATE, validSlots: validSlots.length})
             if(validSlots.length > 0) {
                 notifyMe(validSlots);
             }
@@ -76,7 +77,7 @@ notifyMe(validSlots){
 async function fetchNext10Days(){
     let dates = [];
     let today = moment();
-    for(let i = 0 ; i < 10 ; i ++ ){
+    for(let i = 0 ; i < NUM_OF_DAYS ; i++ ){
         let dateString = today.format('DD-MM-YYYY')
         dates.push(dateString);
         today.add(1, 'day');
