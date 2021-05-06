@@ -15,7 +15,7 @@ To close the app, run: pm2 stop vaccineNotifier.js && pm2 delete vaccineNotifier
  */
 
 const PINCODE = process.env.PINCODE
-const EMAIL = process.env.EMAIL
+const EMAIL = process.env.TO_EMAIL
 const AGE = process.env.AGE
 
 async function main(){
@@ -43,7 +43,8 @@ function getSlotsForDate(DATE) {
         url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=' + PINCODE + '&date=' + DATE,
         headers: {
             'accept': 'application/json',
-            'Accept-Language': 'hi_IN'
+            'Accept-Language': 'hi_IN',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
         }
     };
 
