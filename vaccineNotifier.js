@@ -41,7 +41,7 @@ async function checkAvailability() {
 function getSlotsForDate(DATE) {
     let config = {
         method: 'get',
-        url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=' + PINCODE + '&date=' + DATE,
+        url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=143&date=' + DATE,
         headers: {
             'accept': 'application/json',
             'Accept-Language': 'hi_IN',
@@ -49,13 +49,26 @@ function getSlotsForDate(DATE) {
         }
     };
 
+    
+
     axios(config)
         .then(function (slots) {
-            let sessions = slots.data.sessions;
-            let validSlots = sessions.filter(slot => slot.min_age_limit <= AGE &&  slot.available_capacity > 0)
-            console.log({checked:moment().format('DD-MM-YYYY HH:mm:ss'), date:DATE, validSlots: validSlots.length})
-            if(validSlots.length > 0) {
-                notifyMe(validSlots);
+            let centers = slots.data.centers;
+            let centersWithAvailableSlots = [];
+            centers.forEach((center) => {
+                let validSlots = center.sessions.filter(slot => slot.min_age_limit <= AGE &&  slot.available_capacity > 1)
+                if (validSlots.length > 0)
+                    centersWithAvailableSlots.push({
+                        'name': center.name,
+                        'address': center.address,
+                        'pincode': center.pincode,
+                        'slots' : validSlots
+                    });
+                
+            });
+            console.log({checked:moment().format('DD-MM-YYYY HH:mm:ss'), date: DATE, centersWithAvailableSlots: centersWithAvailableSlots.length});
+            if(centersWithAvailableSlots.length > 0) {
+                notifyMe(centersWithAvailableSlots);
             }
         })
         .catch(function (error) {
@@ -63,9 +76,7 @@ function getSlotsForDate(DATE) {
         });
 }
 
-async function
-
-notifyMe(validSlots){
+async function notifyMe(validSlots){
     let slotDetails = JSON.stringify(validSlots, null, '\t');
     notifier.sendEmail(EMAIL, 'VACCINE AVAILABLE', slotDetails, (err, result) => {
         if(err) {
